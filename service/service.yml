@@ -1,0 +1,15 @@
+{% set NAME = app.name + '-lb' -%}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ NAME }}"
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+spec:
+  selector:
+    app: "{{ app.name }}"
+  ports:
+    - name: http
+      port: 80
+      targetPort: {{ app.port or 8081 }}
+  type: LoadBalancer

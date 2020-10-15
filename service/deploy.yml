@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ app.name }}"
+  labels:
+    app: "{{ app.name }}"
+  namespace: default
+spec:
+  minReadySeconds: 20
+  progressDeadlineSeconds: 60
+  selector:
+    matchLabels:
+      app: "{{ app.name }}"
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: "{{ app.name }}"
+    spec:
+      priorityClassName: high-priority
+      containers:
+      - image: "{{ image.url }}"
+        imagePullPolicy: Always
+        name: "{{ app.name }}"
+        resources:
+          requests:
+            cpu: "{{ resources and resources.requests and resources.requests.cpu or '1000Mi' }}"
+            memory: "{{ resources and resources.requests and resources.requests.memory or '800Mi' }}"
+          limits:
+            cpu: "{{ resources and resources.limits and resources.limits.cpu or '1000Mi' }}"
+            memory: "{{ resources and resources.limits and resources.limits.memory or '800Mi' }}"
+        ports:
+          - name: api-port
+            containerPort: {{ app.port or 8081 }}
+            protocol: "{{ app.protocol or 'TCP' }}"
+      {% if container and container.readinessProbe %}
+        readinessProbe:
+          httpGet:
+            path: /current/health
+            port: api-port
+            httpHeaders:
+              - name: "{{ container.readinessProbe.httpHeaderName }}"
+                value: readiness
+          failureThreshold: {{ container.readinessProbe.httpHeaderName or 2 }}
+          timeoutSeconds: {{ container.readinessProbe.timeoutSeconds or 2 }}
+          periodSeconds: {{ container.readinessProbe.periodSeconds or 20 }}
+          initialDelaySeconds: {{ container.readinessProbe.initialDelaySeconds or 15 }}
+      {% endif %}
+      {% if container and container.readinessProbe %}
+        livenessProbe:
+          httpGet:
+            path: /current/health
+            port: api-port
+            httpHeaders:
+              - name: "{{ container.livenessProbe.httpHeaderName }}"
+                value: liveness
+          failureThreshold: {{ container.livenessProbe.httpHeaderName or 2 }}
+          timeoutSeconds: {{ container.livenessProbe.timeoutSeconds or 2 }}
+          periodSeconds: {{ container.livenessProbe.periodSeconds or 20 }}
+          initialDelaySeconds: {{ container.livenessProbe.initialDelaySeconds or 15 }}
+      {% endif %}
+
+

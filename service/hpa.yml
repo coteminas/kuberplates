@@ -1,0 +1,15 @@
+{% if hpa %}
+{% set NAME = app.name + '-hpa' -%}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "{{ NAME }}"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "{{ app.name }}"
+  minReplicas: {{ hpa.minReplicas or 2 }}
+  maxReplicas: {{ hpa.minReplicas or 40 }}
+  targetCPUUtilizationPercentage: {{ hpa.targetCPUUtilizationPercentage or 50 }}
+{% endif %}
