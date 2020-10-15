@@ -1,0 +1,26 @@
+{% set CTX = cluster.user + '-ctx' %}
+apiVersion: v1
+clusters:
+  - cluster:
+      certificate-authority-data: {{ cluster.certificate }}
+      server: {{ cluster.server }}
+    name: {{ cluster.name }}
+contexts:
+- context:
+    cluster: {{ cluster.name }}
+    user: {{ cluster.user }}
+  name: {{ CTX }}
+current-context: {{ CTX }}
+kind: Config
+preferences: {}
+users:
+- name: {{ cluster.user }}
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - token
+      - -i
+      - {{ cluster.name }}
+      command: aws-iam-authenticator
+      env: null
