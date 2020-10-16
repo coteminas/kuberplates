@@ -10,6 +10,6 @@ spec:
     kind: Deployment
     name: "{{ app.name }}"
   minReplicas: {{ hpa.minReplicas or 2 }}
-  maxReplicas: {{ hpa.minReplicas or 40 }}
+  maxReplicas: {{ hpa.maxReplicas or 40 }}
   targetCPUUtilizationPercentage: {{ hpa.targetCPUUtilizationPercentage or 50 }}
 {% endif %}
