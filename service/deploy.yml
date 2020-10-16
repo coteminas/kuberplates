@@ -45,7 +45,7 @@ spec:
             httpHeaders:
               - name: "{{ container.readinessProbe.httpHeaderName }}"
                 value: readiness
-          failureThreshold: {{ container.readinessProbe.httpHeaderName or 2 }}
+          failureThreshold: {{ container.readinessProbe.failureThreshold or 2 }}
           timeoutSeconds: {{ container.readinessProbe.timeoutSeconds or 2 }}
           periodSeconds: {{ container.readinessProbe.periodSeconds or 20 }}
           initialDelaySeconds: {{ container.readinessProbe.initialDelaySeconds or 15 }}
@@ -58,7 +58,7 @@ spec:
             httpHeaders:
               - name: "{{ container.livenessProbe.httpHeaderName }}"
                 value: liveness
-          failureThreshold: {{ container.livenessProbe.httpHeaderName or 2 }}
+          failureThreshold: {{ container.livenessProbe.failureThreshold or 2 }}
           timeoutSeconds: {{ container.livenessProbe.timeoutSeconds or 2 }}
           periodSeconds: {{ container.livenessProbe.periodSeconds or 20 }}
           initialDelaySeconds: {{ container.livenessProbe.initialDelaySeconds or 15 }}
