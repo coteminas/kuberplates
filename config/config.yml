@@ -1,16 +1,15 @@
-{% set CTX = cluster.user + '-ctx' %}
 apiVersion: v1
 clusters:
   - cluster:
       certificate-authority-data: {{ cluster.certificate }}
       server: {{ cluster.server }}
-    name: {{ cluster.name }}
+    name: {{ cluster.alias }}
 contexts:
 - context:
-    cluster: {{ cluster.name }}
+    cluster: {{ cluster.alias }}
     user: {{ cluster.user }}
-  name: {{ CTX }}
-current-context: {{ CTX }}
+  name: {{ cluster.ctx }}
+current-context: {{ cluster.ctx }}
 kind: Config
 preferences: {}
 users:
@@ -21,6 +20,6 @@ users:
       args:
       - token
       - -i
-      - {{ cluster.name }}
+      - {{ cluster.name or cluster.alias }}
       command: aws-iam-authenticator
       env: null
