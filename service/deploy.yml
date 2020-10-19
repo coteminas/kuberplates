@@ -51,18 +51,20 @@ spec:
         {% set FILE_NAME = app.name + '-config' if key == 'self' else key %}
         {% for value in values %}
           - name: {{ value }}
-            configMapKeyRef:
-              name: {{ FILE_NAME }}
-              key: {{ value }}
+            valueFrom:
+              configMapKeyRef:
+                name: {{ FILE_NAME }}
+                key: {{ value }}
         {% endfor %}
         {% endfor %}
         {% for key, values in envFromSecret.items() %}
         {% set FILE_NAME = app.name + '-secret' if key == 'self' else key %}
         {% for value in values %}
           - name: {{ value }}
-            secretKeyRef:
-              name: {{ FILE_NAME }}
-              key: {{ value }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ FILE_NAME }}
+                key: {{ value }}
         {% endfor %}
         {% endfor %}
       {% endif %}
