@@ -28,11 +28,11 @@ spec:
         name: "{{ app.name }}"
         resources:
           requests:
-            cpu: "{{ resources and resources.requests and resources.requests.cpu or '1000Mi' }}"
+            cpu: "{{ resources and resources.requests and resources.requests.cpu or 1 }}"
             memory: "{{ resources and resources.requests and resources.requests.memory or '800Mi' }}"
           limits:
-            cpu: "{{ resources and resources.limits and resources.limits.cpu or '1000Mi' }}"
-            memory: "{{ resources and resources.limits and resources.limits.memory or '800Mi' }}"
+            cpu: "{{ resources and resources.limits and resources.limits.cpu or 1.5 }}"
+            memory: "{{ resources and resources.limits and resources.limits.memory or '1000Mi' }}"
         ports:
           - name: api-port
             containerPort: {{ app.port or 8081 }}
@@ -40,7 +40,7 @@ spec:
       {% if container and container.readinessProbe %}
         readinessProbe:
           httpGet:
-            path: /current/health
+            path: {{ container.healthCheckUrl or '/current/health' }}
             port: api-port
             httpHeaders:
               - name: "{{ container.readinessProbe.httpHeaderName }}"
@@ -53,7 +53,7 @@ spec:
       {% if container and container.readinessProbe %}
         livenessProbe:
           httpGet:
-            path: /current/health
+            path: {{ container.healthCheckUrl or '/current/health' }}
             port: api-port
             httpHeaders:
               - name: "{{ container.livenessProbe.httpHeaderName }}"
