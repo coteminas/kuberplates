@@ -28,16 +28,45 @@ spec:
         name: "{{ app.name }}"
         resources:
           requests:
-            cpu: "{{ resources and resources.requests and resources.requests.cpu or 1 }}"
-            memory: "{{ resources and resources.requests and resources.requests.memory or '800Mi' }}"
+            cpu: {{ resources and resources.requests and resources.requests.cpu or 1 }}
+            memory: {{ resources and resources.requests and resources.requests.memory or '800Mi' }}
           limits:
-            cpu: "{{ resources and resources.limits and resources.limits.cpu or 1.5 }}"
-            memory: "{{ resources and resources.limits and resources.limits.memory or '1000Mi' }}"
+            cpu: {{ resources and resources.limits and resources.limits.cpu or 1.5 }}
+            memory: {{ resources and resources.limits and resources.limits.memory or '1000Mi' }}
         ports:
           - name: api-port
             containerPort: {{ app.port or 8081 }}
             protocol: "{{ app.protocol or 'TCP' }}"
-      {% if container and container.readinessProbe %}
+      {% if container %}
+      {% set envFromSecret = container.envFromSecret or {} %}
+      {% set envFromConfig = container.envFromConfig or {} %}
+      {% set envRaw = container.env or {} %}
+      {% if envFromConfig|length + envRaw|length + envFromSecret|length > 0 %}
+        env:
+        {% for key, value in envRaw.items() %}
+          - name: {{ key }}
+            value: {{ value }}
+        {% endfor %}
+        {% for key, values in envFromConfig.items() %}
+        {% set FILE_NAME = app.name + '-config' if key == 'self' else key %}
+        {% for value in values %}
+          - name: {{ value }}
+            configMapKeyRef:
+              name: {{ FILE_NAME }}
+              key: {{ value }}
+        {% endfor %}
+        {% endfor %}
+        {% for key, values in envFromSecret.items() %}
+        {% set FILE_NAME = app.name + '-secret' if key == 'self' else key %}
+        {% for value in values %}
+          - name: {{ value }}
+            secretKeyRef:
+              name: {{ FILE_NAME }}
+              key: {{ value }}
+        {% endfor %}
+        {% endfor %}
+      {% endif %}
+      {% if container.readinessProbe %}
         readinessProbe:
           httpGet:
             path: {{ container.healthCheckUrl or '/current/health' }}
@@ -50,7 +79,7 @@ spec:
           periodSeconds: {{ container.readinessProbe.periodSeconds or 20 }}
           initialDelaySeconds: {{ container.readinessProbe.initialDelaySeconds or 15 }}
       {% endif %}
-      {% if container and container.readinessProbe %}
+      {% if container.readinessProbe %}
         livenessProbe:
           httpGet:
             path: {{ container.healthCheckUrl or '/current/health' }}
@@ -63,5 +92,5 @@ spec:
           periodSeconds: {{ container.livenessProbe.periodSeconds or 20 }}
           initialDelaySeconds: {{ container.livenessProbe.initialDelaySeconds or 15 }}
       {% endif %}
-
+      {% endif %}
 
