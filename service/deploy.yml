@@ -38,6 +38,9 @@ spec:
             containerPort: {{ app.port or 8081 }}
             protocol: "{{ app.protocol or 'TCP' }}"
       {% if container %}
+        command: {{ container.command }}
+      {% if container.cmd %}
+      {% endif %}
       {% set envFromSecret = container.envFromSecret or {} %}
       {% set envFromConfig = container.envFromConfig or {} %}
       {% set envRaw = container.env or {} %}
