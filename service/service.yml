@@ -1,4 +1,3 @@
-{% if container.ignoreService %}
 {% set NAME = app.name + '-lb' -%}
 apiVersion: v1
 kind: Service
@@ -14,4 +13,3 @@ spec:
       port: 80
       targetPort: {{ app.port or 8081 }}
   type: LoadBalancer
-{% endif %}
