@@ -84,7 +84,7 @@ spec:
           periodSeconds: {{ container.readinessProbe.periodSeconds or 20 }}
           initialDelaySeconds: {{ container.readinessProbe.initialDelaySeconds or 15 }}
       {% endif %}
-      {% if container.readinessProbe %}
+      {% if container.livenessProbe %}
         livenessProbe:
           httpGet:
             path: {{ container.healthCheckUrl or '/current/health' }}
